@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>group : {{group_name}}</h1>
+    <textarea id="msg-field" cols="100" rows="20" readonly></textarea>
+     <form>
+        <div>
+    <input type="text" id="input">
+    {{group_name|json_script:"group_name"}}
+</div>
+
+<button id="button"> submit</button>
+</form> 
+    
+</body>
+<script>
+    const groupname=JSON.parse( document.getElementById("group_name").textContent)
+    const ws=  new WebSocket('ws://127.0.0.1:8000/ws/async/'+groupname+'/')
+    ws.onopen=()=>{
+       console.log("connection")
+    }
+    ws.onmessage=(event)=>{
+    const data=JSON.parse(event.data)
+    document.getElementById("msg-field").textContent+=  data.message +'\n' 
+
+
+    }
+    ws.onclose=()=>{
+        console.error("conenction lost")
+    }
+    document.getElementById("button").addEventListener('click',(e)=>{
+        e.preventDefault()
+        const data= document.getElementById('input')
+        ws.send(JSON.stringify({
+            "message":data.value
+        }))
+        data.value=""
+    })
+</script>
+</html>
